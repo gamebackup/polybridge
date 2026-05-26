@@ -206,14 +206,15 @@
             try {
                 if (IsLocalHost()) return;
 
+                if (typeof YaGames === "undefined") {
+                    syncInit = true;
+                    return;
+                }
+
                 ysdk = await YaGames.init();
 
                 // Additional init0 modules
 InterAdvShow();
-
-await RequestingEnvironmentData();
-LogStyledMessage('Init EnvirData ysdk');
-
 
                 // Additional init1 modules
 
