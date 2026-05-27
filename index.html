@@ -193,16 +193,12 @@ window.YaGames = {
                     ygGameInstance = unityInstance;
                     loadingCover.style.display = "none";
                     if (initYSDK) {
-                        InterAdvShow();
-                        Promise.all([
-                            RequestingEnvironmentData(),
-                            InitPlayer(),
-                            GetAllGames()
-                        ]).then(() => {
-                            setTimeout(function() {
-                                ygGameInstance.SendMessage('YG2Instance', 'InitSDKComplete');
-                            }, 200);
-                        });
+                        if (environmentData !== NO_DATA)
+                            ygGameInstance.SendMessage('YG2Instance', 'SetEnvirData', environmentData);
+                        if (playerData !== NO_DATA)
+                            ygGameInstance.SendMessage('YG2Instance', 'SetAuth', playerData);
+                        ygGameInstance.SendMessage('YG2Instance', 'InitSDKComplete');
+                        LogStyledMessage('Init YandexSDK Success');
                     }
                 }).catch((message) => {
                     console.error(message);
@@ -288,6 +284,8 @@ window.YaGames = {
 InterAdvShow();
 
                 // Additional init1 modules
+await RequestingEnvironmentData();
+LogStyledMessage('Init EnvirData ysdk');
 
                 // Additional init2 modules
 await InitPlayer();
