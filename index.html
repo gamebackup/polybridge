@@ -133,8 +133,16 @@
                 }).then((unityInstance) => {
                     ygGameInstance = unityInstance;
                     loadingCover.style.display = "none";
-                    if (initYSDK)
-                        ygGameInstance.SendMessage('YG2Instance', 'InitSDKComplete');
+                    if (initYSDK) {
+                        InterAdvShow();
+                        Promise.all([
+                            RequestingEnvironmentData(),
+                            InitPlayer(),
+                            GetAllGames()
+                        ]).then(() => {
+                            ygGameInstance.SendMessage('YG2Instance', 'InitSDKComplete');
+                        });
+                    }
                 }).catch((message) => {
                     console.error(message);
                 });
