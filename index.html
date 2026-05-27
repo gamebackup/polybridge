@@ -5,8 +5,67 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="index_files/style.css">
-<!-- Yandex Games SDK -->
-<script src="index_files/sdk.js"></script>
+<!-- Yandex Games SDK mock -->
+<script>
+window.YaGames = {
+    init: function() {
+        return Promise.resolve({
+            deviceInfo: {
+                type: 'desktop',
+                isMobile: () => /Mobi|Android/i.test(navigator.userAgent),
+                isTablet: () => false,
+                isDesktop: () => !/Mobi|Android/i.test(navigator.userAgent),
+                isTV: () => false
+            },
+            screen: {
+                fullscreen: {
+                    status: 'off',
+                    request: function() {}
+                }
+            },
+            environment: {
+                i18n: { lang: 'en', tld: 'com' },
+                app: { id: '0' },
+                browser: { lang: 'en' },
+                payload: ''
+            },
+            adv: {
+                showFullscreenAdv: function(opts) {
+                    if (opts && opts.callbacks) {
+                        if (opts.callbacks.onClose) opts.callbacks.onClose(false);
+                    }
+                },
+                showRewardedVideo: function(opts) {
+                    if (opts && opts.callbacks) {
+                        if (opts.callbacks.onError) opts.callbacks.onError('SDK mock');
+                    }
+                }
+            },
+            getPlayer: function() {
+                return Promise.resolve({
+                    getName: () => 'anonymous',
+                    getPhoto: function() { return ''; },
+                    getMode: () => 'lite',
+                    getUniqueID: () => '0',
+                    getPayingStatus: () => 'unknown'
+                });
+            },
+            features: {
+                GamesAPI: {
+                    getAllGames: function() {
+                        return Promise.resolve({ games: [], developerURL: '' });
+                    }
+                }
+            },
+            auth: {
+                openAuthDialog: function() {
+                    return Promise.reject('Auth not available');
+                }
+            }
+        });
+    }
+};
+</script>
 <style>
         canvas:focus {
             outline: none;
@@ -140,7 +199,9 @@
                             InitPlayer(),
                             GetAllGames()
                         ]).then(() => {
-                            ygGameInstance.SendMessage('YG2Instance', 'InitSDKComplete');
+                            setTimeout(function() {
+                                ygGameInstance.SendMessage('YG2Instance', 'InitSDKComplete');
+                            }, 200);
                         });
                     }
                 }).catch((message) => {
@@ -217,10 +278,8 @@
             try {
                 if (IsLocalHost()) return;
 
-                if (typeof YaGames === "undefined") {
+                if (window === window.top) {
                     syncInit = true;
-                    initYSDK = true;
-                    return;
                 }
 
                 ysdk = await YaGames.init();
